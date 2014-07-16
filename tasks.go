@@ -6,6 +6,8 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"fmt"
+	"os"
 )
 
 type Tasks []Task
@@ -22,6 +24,7 @@ func (tasks Tasks) toBytes() ([]byte, error) {
 func (tasks Tasks) save() error {
 	bytes, err := json.Marshal(tasks)
 	if err != nil {
+		fmt.Println(fmt.Sprintf("Error saving: %s", err))
 		return err
 	} else {
 		filename := "tasks.json"
@@ -37,12 +40,15 @@ func (tasks *Tasks) load() error {
 		filename = "tasks.json"
 	)
 	bytes, err = ioutil.ReadFile(filename)
+
 	if err != nil {
+		fmt.Println(fmt.Sprintf("Error loading: %s", err))
 		return err
 	}
 
 	err = json.Unmarshal(bytes, tasks)
 	if err != nil {
+		fmt.Println(fmt.Sprintf("Bytes: %s", bytes))
 		return err
 	}
 
@@ -116,6 +122,12 @@ func newTasksHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	// make sure tasks.json exists.
+	_, err := ioutil.ReadFile("tasks.json")
+	if os.IsNotExist(err) {
+		ioutil.WriteFile("tasks.json", []byte("[]"), 0600)
+	}
+
 	http.HandleFunc("/tasks", tasksHandler)
 	http.HandleFunc("/task/new", newTasksHandler)
 	http.ListenAndServe(":8080", nil)
