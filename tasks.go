@@ -1,7 +1,6 @@
 package main
 
 import (
-	// "fmt"
 	"encoding/json"
 	"io/ioutil"
 	"log"
@@ -35,11 +34,11 @@ func (tasks Tasks) save() error {
 }
 
 func (tasks *Tasks) load() error {
-	var (
-		err      error
-		bytes    []byte
-	)
-	bytes, err = ioutil.ReadFile(fileName)
+//	var (
+//		err      error
+//		bytes    []byte
+//	)
+	bytes, err := ioutil.ReadFile(fileName)
 
 	if err != nil {
 		fmt.Println(fmt.Sprintf("Error loading: %s", err))
@@ -66,24 +65,27 @@ func tasksHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 	bytes, err := tasks.toBytes()
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	w.Write(bytes)
 }
 
 func newTasksHandler(w http.ResponseWriter, r *http.Request) {
 
 	// read json post parameters
-	var taskJSON []byte
+//	var taskJSON []byte
 
-	{
+//	{
 		//		var err error
-		tj, err := ioutil.ReadAll(r.Body)
+		taskJSON, err := ioutil.ReadAll(r.Body)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
-		} else {
-			taskJSON = tj
 		}
-	}
+//	}
 
 	var task Task
 	{
