@@ -10,6 +10,8 @@ import (
 	"os"
 )
 
+const fileName = "tasks.json"
+
 type Tasks []Task
 type Task struct {
 	Name        string
@@ -27,8 +29,7 @@ func (tasks Tasks) save() error {
 		fmt.Println(fmt.Sprintf("Error saving: %s", err))
 		return err
 	} else {
-		filename := "tasks.json"
-		return ioutil.WriteFile(filename, bytes, 0600)
+		return ioutil.WriteFile(fileName, bytes, 0600)
 	}
 
 }
@@ -37,9 +38,8 @@ func (tasks *Tasks) load() error {
 	var (
 		err      error
 		bytes    []byte
-		filename = "tasks.json"
 	)
-	bytes, err = ioutil.ReadFile(filename)
+	bytes, err = ioutil.ReadFile(fileName)
 
 	if err != nil {
 		fmt.Println(fmt.Sprintf("Error loading: %s", err))
@@ -123,9 +123,9 @@ func newTasksHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	// make sure tasks.json exists.
-	_, err := ioutil.ReadFile("tasks.json")
+	_, err := ioutil.ReadFile(fileName)
 	if os.IsNotExist(err) {
-		ioutil.WriteFile("tasks.json", []byte("[]"), 0600)
+		ioutil.WriteFile(fileName, []byte("[]"), 0600)
 	}
 
 	http.HandleFunc("/tasks", tasksHandler)
