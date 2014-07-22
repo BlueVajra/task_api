@@ -34,8 +34,24 @@ I would write a little intro here to get things up and running on your machine..
 
 http://golang.org/doc/
 
+## Building for Linux
+
+In order to cross compile for Linux on OSX, make sure you have cross compilation enabled.
+You can then use `GOOS=linux GOARCH=amd64 go build -o bin/task_api-linux` from the root of this project
+to build the Linux binary.
+
 ## Deployment
-Deploying the service is done via [Ansible](http://www.ansible.com/home).
+
+The current deployment model is:
+
+1. ssh to box `ssh root@107.170.31.184`
+2. connect to running tmux session `tmux attach -t cory`
+3. stop running server using ctrl-c
+4. scp new binary to server `scp <path-to-binary> root@107.170.31.184:~`
+5. restart binary
+6. detach from session `ctrl-b d`
+
+Deploying the service via [Ansible](http://www.ansible.com/home) is in the works.
 Right now two groups are supported, local and production.
 
 * The local group runs against a Ubuntu 14.04 server that runs on your development
