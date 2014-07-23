@@ -47,8 +47,8 @@ The current deployment model is:
 1. ssh to box `ssh root@107.170.31.184`
 2. connect to running tmux session `tmux attach -t cory`
 3. stop running server using ctrl-c
-4. scp new binary to server `scp <path-to-binary> root@107.170.31.184:~`
-5. restart binary
+4. scp new binary to server from your local machine `scp <local-path-to-binary> root@107.170.31.184:~`
+5. restart binary in tmuxh session
 6. detach from session `ctrl-b d`
 
 Deploying the service via [Ansible](http://www.ansible.com/home) is in the works.
