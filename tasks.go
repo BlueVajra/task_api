@@ -33,6 +33,8 @@ func (tasks Tasks) save() error {
 
 }
 
+// try refactorings so we are passing the data and a writer to the method.
+
 func (tasks *Tasks) load() error {
 //	var (
 //		err      error
@@ -55,73 +57,130 @@ func (tasks *Tasks) load() error {
 }
 
 func tasksHandler(w http.ResponseWriter, r *http.Request) {
-	var tasks Tasks
-	err := tasks.load()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-	bytes, err := tasks.toBytes()
-
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	w.Write(bytes)
-}
-
-func newTasksHandler(w http.ResponseWriter, r *http.Request) {
-
-	// read json post parameters
-//	var taskJSON []byte
-
-//	{
-		//		var err error
+	log.Println("Testing: ", r.Body)
+	if r.Method == "POST" {
+//		email := req.FormValue("email")
+//		// ...
+//		fmt.Println("Sending confirmation email to:", email)
 		taskJSON, err := ioutil.ReadAll(r.Body)
+
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-//	}
+		//	}
 
-	var task Task
-	{
-		err := json.Unmarshal(taskJSON, &task)
-		if err != nil {
+		var task Task
+		{
+			err := json.Unmarshal(taskJSON, &task)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+		}
+		log.Println("New Task: ", task)
+
+
+		var tasks Tasks
+		{
+			err := tasks.load()
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+		}
+
+
+		tasks = append(tasks, task)
+
+		log.Println("All Tasks: ", tasks)
+
+		if err := tasks.save(); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-	}
-	log.Println("New Task: ", task)
 
+//		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(200)
+		w.Write(taskJSON)
+	}else{
 
-	var tasks Tasks
-	{
+		var tasks Tasks
 		err := tasks.load()
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
+//		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(200)
+		bytes, err := tasks.toBytes()
+
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.Write(bytes)
+
 	}
 
 
-	tasks = append(tasks, task)
 
-	log.Println("All Tasks: ", tasks)
-
-	if err := tasks.save(); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-	w.Write(taskJSON)
 }
+
+//func newTasksHandler(w http.ResponseWriter, r *http.Request) {
+//
+//	// read json post parameters
+////	var taskJSON []byte
+//
+////	{
+//		//		var err error
+//		taskJSON, err := ioutil.ReadAll(r.Body)
+//		if err != nil {
+//			http.Error(w, err.Error(), http.StatusInternalServerError)
+//			return
+//		}
+////	}
+//
+//	var task Task
+//	{
+//		err := json.Unmarshal(taskJSON, &task)
+//		if err != nil {
+//			http.Error(w, err.Error(), http.StatusInternalServerError)
+//			return
+//		}
+//	}
+//	log.Println("New Task: ", task)
+//
+//
+//	var tasks Tasks
+//	{
+//		err := tasks.load()
+//		if err != nil {
+//			http.Error(w, err.Error(), http.StatusInternalServerError)
+//			return
+//		}
+//
+//	}
+//
+//
+//	tasks = append(tasks, task)
+//
+//	log.Println("All Tasks: ", tasks)
+//
+//	if err := tasks.save(); err != nil {
+//		http.Error(w, err.Error(), http.StatusInternalServerError)
+//		return
+//	}
+//
+//	w.Header().Set("Content-Type", "application/json")
+//	w.WriteHeader(200)
+//	w.Write(taskJSON)
+//}
 
 func main() {
 	// make sure tasks.json exists.
@@ -129,8 +188,8 @@ func main() {
 	if os.IsNotExist(err) {
 		ioutil.WriteFile(fileName, []byte("[]"), 0600)
 	}
-
-	http.HandleFunc("/tasks", tasksHandler)
-	http.HandleFunc("/task/new", newTasksHandler)
+	log.Println("STARTING")
+	http.HandleFunc("/api/tasks", tasksHandler)
+//	http.HandleFunc("/api/task/new", newTasksHandler)
 	http.ListenAndServe(":8080", nil)
 }
