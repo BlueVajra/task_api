@@ -14,14 +14,14 @@ Working in conjunction with
 
 ## Get and Post tasks
 
-our little server handles POST commands to `/task/new` with in the following format:
+our little server handles POST commands to `/api/tasks` with in the following format:
 
 ```
 {"Name":"Wash Dishes","Description":"Is the name not clear enough?"}
 
 ```
 
-you can also get all tasks with `/tasks`
+you can also get all tasks with `/api/tasks`
 
 ## Take a look online!
 
